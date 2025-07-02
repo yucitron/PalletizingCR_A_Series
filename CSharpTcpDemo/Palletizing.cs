@@ -465,6 +465,9 @@ namespace CSharpTcpDemo
             double rx1 = GlobalVeri.PalletPt1.rx;
             double ry1 = GlobalVeri.PalletPt1.ry;
             double rz1 = GlobalVeri.PalletPt1.rz;
+           GlobalVeri.UpdatePalletPt1(GlobalVeri.PalletPt1);
+            PrintLog2($"Pallet Point 1 set to: {GlobalVeri.PalletPt1}");
+
 
         }
 
