@@ -1,5 +1,3 @@
-Chinese version of the README -> please [click here](./README.md)
-
 ### Run step
 1. Requires .Net Framework 4.5 and above.
 2. Open CSharpTcpDemo.sln with Visual Studio2017.
