@@ -16,7 +16,7 @@ using ComboBox = System.Windows.Forms.ComboBox;
 
 // Yönelim enum'u
 public enum KutuYonelimi
-{
+{   
     Kuzey = 0,      // ↑
     KuzeyDogu = 1,  // ↗
     Dogu = 2,       // →
