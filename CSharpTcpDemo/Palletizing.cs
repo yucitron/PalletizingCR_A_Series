@@ -24,18 +24,20 @@ namespace CSharpTcpDemo
         }
 
         private Feedback mFeedback = new Feedback();
-
         private Dashboard mDashboard = new Dashboard();
         private DobotMove mDobotMove = new DobotMove();
-        //定时获取数据并显示到UI
+
+
+        private RobotConnectionManager robotManager;
+        //定时获取数据并显示到UI*/
+
+
+
+
         private System.Timers.Timer mTimer = new System.Timers.Timer(300);
 
-
         private Boxes Boxes = new Boxes();
-
         public List<KutuNesnesi> kutular;
-
-
         public int pltHeight = 10;
 
 
@@ -203,7 +205,16 @@ namespace CSharpTcpDemo
             InitializeComponent();
             UseCoordinates();
             pltHeight = Convert.ToInt16(numpltHeight.Value);
+            //////
+            InitializeRobotComponents();
+        }
 
+        private void InitializeRobotComponents()
+        {
+            robotManager = RobotConnectionManager.Instance;
+            mFeedback = robotManager.Feedback;
+            mDashboard = robotManager.Dashboard;
+            mDobotMove = robotManager.DobotMove;
         }
 
         public void PrintLog2(string str)
@@ -280,7 +291,7 @@ namespace CSharpTcpDemo
 
         public void InsertLogToRichBox(RichTextBox box, string str)
         {
-            if (box.GetLineFromCharIndex(box.TextLength) > 100)
+            if (box.GetLineFromCharIndex(box.TextLength) > 300)
             {
                 box.Text = (str += "\r\n");
             }
@@ -343,9 +354,9 @@ namespace CSharpTcpDemo
                     Adx = 300;
                     
 
-                    pt1.x = (GlobalVeri.PalletPt1.x + (Adx * ((double)kutu.Merkez.X / Boxes.paletYukseklik)));
+                    pt1.x = (GlobalVeri.PalletPt1.x + (Adx * ((double)kutu.Merkez.X / Boxes.paletGenislik)));
                     pt1.y = GlobalVeri.PalletPt1.y + (Ady * ((double)kutu.Merkez.Y / Boxes.paletYukseklik));
-                    double oran = ((double)kutu.Merkez.X / Boxes.paletYukseklik);
+                    double oran = ((double)kutu.Merkez.X / Boxes.paletGenislik);
                     //pt1.x = kutu.Merkez.X;
                     //pt1.y = kutu.Merkez.Y;
                     pt1.z = 50;
@@ -526,6 +537,11 @@ namespace CSharpTcpDemo
 
 
 
+        }
+
+        private void btnclear_Click(object sender, EventArgs e)
+        {
+            rich2TextBoxLog.Text = "";
         }
     }
 }

@@ -8,33 +8,26 @@ using System.Threading.Tasks;
 
 namespace CSharpTcpDemo
 {
-    public  class RobotConnectionManager
+    public class RobotConnectionManager
     {
+        #region Singleton Pattern Implementation
+
+        // Thread-safe singleton için lock object
         private static readonly object _lock = new object();
+
+        // Tek instance'ı saklar
         private static RobotConnectionManager _instance = null;
 
-        // Robot bağlantı nesneleri
-        private Feedback mFeedback;
-        private DobotMove mDobotMove;
-        private Dashboard mDashboard;
-
-        // Timer'lar
-        private System.Timers.Timer mTimer;
-        private System.Timers.Timer mTimerReader;
-
-        // Bağlantı durumu
-        public bool IsConnected { get; private set; } = false;
-
-        // Singleton instance
+        // Singleton instance property - Double-checked locking pattern
         public static RobotConnectionManager Instance
         {
             get
             {
-                if (_instance == null)
+                if (_instance == null) // İlk kontrol (performance için)
                 {
-                    lock (_lock)
+                    lock (_lock) // Thread safety için lock
                     {
-                        if (_instance == null)
+                        if (_instance == null) // İkinci kontrol (thread safety için)
                             _instance = new RobotConnectionManager();
                     }
                 }
@@ -42,11 +35,40 @@ namespace CSharpTcpDemo
             }
         }
 
+        // Private constructor - dışarıdan instance oluşturulmasını engeller
         private RobotConnectionManager()
         {
             InitializeConnections();
         }
 
+        #endregion
+
+        #region Robot Connection Objects
+
+        // Robot bağlantı nesneleri - private field'lar
+        private Feedback mFeedback;
+        private DobotMove mDobotMove;
+        private Dashboard mDashboard;
+
+        // Timer'lar - bağlantı süresince aktif kalacak
+        private System.Timers.Timer mTimer;
+        private System.Timers.Timer mTimerReader;
+
+        // Bağlantı durumu
+        public bool IsConnected { get; private set; } = false;
+
+        // Robot komponentlerine erişim için public property'ler
+        public Dashboard Dashboard => mDashboard;
+        public DobotMove DobotMove => mDobotMove;
+        public Feedback Feedback => mFeedback;
+
+        #endregion
+
+        #region Connection Management
+
+        /// <summary>
+        /// Robot bağlantı nesnelerini initialize et
+        /// </summary>
         private void InitializeConnections()
         {
             mFeedback = new Feedback();
@@ -54,6 +76,39 @@ namespace CSharpTcpDemo
             mDashboard = new Dashboard();
             mTimer = new System.Timers.Timer(300);
             mTimerReader = new System.Timers.Timer(300);
+
+            // Timer event'lerini bağla
+            SetupTimers();
+        }
+
+        /// <summary>
+        /// Timer'ları yapılandır
+        /// </summary>
+        private void SetupTimers()
+        {
+            mTimerReader.Elapsed += (sender, e) => {
+                // Feedback okuma işlemi
+                if (IsConnected && mFeedback != null)
+                {
+                    try
+                    {
+                        // Feedback verilerini oku
+                        // mFeedback.GetFeedbackData(); // API'ye göre düzenleyin
+                    }
+                    catch (Exception ex)
+                    {
+                        LogMessage($"Feedback reading error: {ex.Message}");
+                    }
+                }
+            };
+
+            mTimer.Elapsed += (sender, e) => {
+                // Diğer periyodik işlemler
+                if (IsConnected)
+                {
+                    // Status kontrolü vb.
+                }
+            };
         }
 
         /// <summary>
@@ -61,45 +116,61 @@ namespace CSharpTcpDemo
         /// </summary>
         public void Connect()
         {
-            if (IsConnected) return;
+            if (IsConnected)
+            {
+                LogMessage("Robot already connected!");
+                return;
+            }
 
             string strIp = "192.168.5.1";
             int iPortFeedback = 30004;
             int iPortMove = 30003;
             int iPortDashboard = 29999;
 
-            LogMessage("Connecting...");
+            LogMessage("Connecting to robot...");
 
             Thread connectionThread = new Thread(() => {
                 try
                 {
+                    // Dashboard bağlantısı
                     if (!mDashboard.Connect(strIp, iPortDashboard))
                     {
-                        LogMessage($"Connect {strIp}:{iPortDashboard} Fail!!");
+                        LogMessage($"Dashboard connection failed: {strIp}:{iPortDashboard}");
                         return;
                     }
+                    LogMessage($"Dashboard connected: {strIp}:{iPortDashboard}");
 
+                    // Move bağlantısı
                     if (!mDobotMove.Connect(strIp, iPortMove))
                     {
-                        LogMessage($"Connect {strIp}:{iPortMove} Fail!!");
+                        LogMessage($"Move connection failed: {strIp}:{iPortMove}");
                         return;
                     }
+                    LogMessage($"Move connected: {strIp}:{iPortMove}");
 
+                    // Feedback bağlantısı
                     if (!mFeedback.Connect(strIp, iPortFeedback))
                     {
-                        LogMessage($"Connect {strIp}:{iPortFeedback} Fail!!");
+                        LogMessage($"Feedback connection failed: {strIp}:{iPortFeedback}");
                         return;
                     }
+                    LogMessage($"Feedback connected: {strIp}:{iPortFeedback}");
 
+                    // Bağlantı başarılı - Timer'ları başlat
                     mTimerReader.Start();
+                    mTimer.Start();
+
                     IsConnected = true;
-                    LogMessage("Connect Success!!!");
+                    LogMessage("Robot connection successful!");
                 }
                 catch (Exception ex)
                 {
-                    LogMessage($"Connection Error: {ex.Message}");
+                    LogMessage($"Connection error: {ex.Message}");
+                    IsConnected = false;
                 }
             });
+
+            connectionThread.IsBackground = true; // Ana thread kapanınca bu da kapansın
             connectionThread.Start();
         }
 
@@ -108,50 +179,133 @@ namespace CSharpTcpDemo
         /// </summary>
         public void Disconnect()
         {
-            if (!IsConnected) return;
+            if (!IsConnected)
+            {
+                LogMessage("Robot already disconnected!");
+                return;
+            }
 
             try
             {
+                // Timer'ları durdur
                 mTimerReader?.Stop();
                 mTimer?.Stop();
 
                 // Bağlantıları kapat (API'nizde disconnect metodları varsa)
-                // mDashboard?.Disconnect();
-                // mDobotMove?.Disconnect();
-                // mFeedback?.Disconnect();
+                try { mDashboard?.Disconnect(); } catch { }
+                try { mDobotMove?.Disconnect(); } catch { }
+                try { mFeedback?.Disconnect(); } catch { }
 
                 IsConnected = false;
-                LogMessage("Disconnected from robot");
+                LogMessage("Robot disconnected successfully!");
             }
             catch (Exception ex)
             {
-                LogMessage($"Disconnect Error: {ex.Message}");
+                LogMessage($"Disconnect error: {ex.Message}");
             }
         }
 
-        // Robot komutları için property'ler
-        public Dashboard Dashboard => mDashboard;
-        public DobotMove DobotMove => mDobotMove;
-        public Feedback Feedback => mFeedback;
+        /// <summary>
+        /// Bağlantı durumunu kontrol et ve gerekirse yeniden bağlan
+        /// </summary>
+        public void CheckConnection()
+        {
+            if (!IsConnected)
+            {
+                LogMessage("Connection lost, attempting to reconnect...");
+                Connect();
+            }
+        }
 
-        // Log event'i
+        #endregion
+
+        #region Logging System
+
+        // Log event'i - tüm formlar bu event'e subscribe olabilir
         public event Action<string> LogReceived;
 
         private void LogMessage(string message)
         {
-            LogReceived?.Invoke($"[{DateTime.Now:HH:mm:ss}] {message}");
+            string timeStampedMessage = $"[{DateTime.Now:HH:mm:ss}] {message}";
+            LogReceived?.Invoke(timeStampedMessage);
+
+            // Debug için console'a da yazdır
+            System.Diagnostics.Debug.WriteLine(timeStampedMessage);
         }
+
+        #endregion
+
+        #region Cleanup and Disposal
 
         /// <summary>
         /// Uygulama kapanırken resources'ları temizle
         /// </summary>
         public void Cleanup()
         {
-            Disconnect();
-            mTimer?.Dispose();
-            mTimerReader?.Dispose();
+            try
+            {
+                Disconnect();
+
+                // Timer'ları dispose et
+                mTimer?.Dispose();
+                mTimerReader?.Dispose();
+
+                LogMessage("RobotConnectionManager cleaned up");
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"Cleanup error: {ex.Message}");
+            }
         }
+
+        // Finalizer - garbage collector tarafından çağrılır
+        ~RobotConnectionManager()
+        {
+            Cleanup();
+        }
+
+        #endregion
+
+        #region Utility Methods
+
+        /// <summary>
+        /// Robot komutları için güvenli wrapper
+        /// </summary>
+        /// <param name="robotCommand">Çalıştırılacak robot komutu</param>
+        /// <param name="commandName">Komut adı (log için)</param>
+        /// <returns>Komut sonucu</returns>
+        public string ExecuteCommand(Func<string> robotCommand, string commandName)
+        {
+            if (!IsConnected)
+            {
+                string errorMsg = $"Robot not connected. Cannot execute {commandName}";
+                LogMessage(errorMsg);
+                return errorMsg;
+            }
+
+            try
+            {
+                LogMessage($"Executing: {commandName}");
+                string result = robotCommand();
+                LogMessage($"Result: {result}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string errorMsg = $"Command {commandName} failed: {ex.Message}";
+                LogMessage(errorMsg);
+                return errorMsg;
+            }
+        }
+
+        /// <summary>
+        /// Robot durumunu string olarak getir
+        /// </summary>
+        public string GetConnectionStatus()
+        {
+            return IsConnected ? "Connected" : "Disconnected";
+        }
+
+        #endregion
     }
 }
-
-

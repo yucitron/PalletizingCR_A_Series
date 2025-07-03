@@ -52,6 +52,7 @@
             this.Pt3btn = new System.Windows.Forms.Button();
             this.groupBoxLog = new System.Windows.Forms.GroupBox();
             this.rich2TextBoxLog = new System.Windows.Forms.RichTextBox();
+            this.btnclear = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -270,11 +271,11 @@
             // groupBoxLog
             // 
             this.groupBoxLog.Controls.Add(this.rich2TextBoxLog);
-            this.groupBoxLog.Location = new System.Drawing.Point(852, 720);
+            this.groupBoxLog.Location = new System.Drawing.Point(852, 636);
             this.groupBoxLog.Margin = new System.Windows.Forms.Padding(5);
             this.groupBoxLog.Name = "groupBoxLog";
             this.groupBoxLog.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBoxLog.Size = new System.Drawing.Size(379, 206);
+            this.groupBoxLog.Size = new System.Drawing.Size(379, 374);
             this.groupBoxLog.TabIndex = 19;
             this.groupBoxLog.TabStop = false;
             this.groupBoxLog.Text = "Log";
@@ -284,15 +285,26 @@
             this.rich2TextBoxLog.Location = new System.Drawing.Point(10, 30);
             this.rich2TextBoxLog.Margin = new System.Windows.Forms.Padding(5);
             this.rich2TextBoxLog.Name = "rich2TextBoxLog";
-            this.rich2TextBoxLog.Size = new System.Drawing.Size(359, 153);
+            this.rich2TextBoxLog.Size = new System.Drawing.Size(359, 334);
             this.rich2TextBoxLog.TabIndex = 2;
             this.rich2TextBoxLog.Text = "";
+            // 
+            // btnclear
+            // 
+            this.btnclear.Location = new System.Drawing.Point(1240, 645);
+            this.btnclear.Name = "btnclear";
+            this.btnclear.Size = new System.Drawing.Size(71, 34);
+            this.btnclear.TabIndex = 20;
+            this.btnclear.Text = "Clear";
+            this.btnclear.UseVisualStyleBackColor = true;
+            this.btnclear.Click += new System.EventHandler(this.btnclear_Click);
             // 
             // Palletizing
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1398, 1024);
+            this.Controls.Add(this.btnclear);
             this.Controls.Add(this.groupBoxLog);
             this.Controls.Add(this.Pt3btn);
             this.Controls.Add(this.Pt2btn);
@@ -350,5 +362,6 @@
         private System.Windows.Forms.Button Pt3btn;
         private System.Windows.Forms.GroupBox groupBoxLog;
         public System.Windows.Forms.RichTextBox rich2TextBoxLog;
+        private System.Windows.Forms.Button btnclear;
     }
 }

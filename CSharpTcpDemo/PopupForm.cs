@@ -17,6 +17,7 @@ namespace CSharpTcpDemo
         private Form1 form1 = new Form1();
         private MainForm mainForm = new MainForm();
 
+
         private Feedback mFeedback = new Feedback();
          private DobotMove mDobotMove = new DobotMove();
         private Dashboard mDashboard = new Dashboard();
@@ -82,7 +83,7 @@ namespace CSharpTcpDemo
             {
                 Button btn = (Button)sender;
                 string str = btn.Tag.ToString();
-                mainForm.DoMoveJog(str);
+                DoMoveJog(str);
             }
         }
         private void OnStopMoveJogEvent(object sender, MouseEventArgs e)
@@ -135,9 +136,12 @@ namespace CSharpTcpDemo
             thd.Start();
         }
 
+        
+            
+
         private void PopupForm_Load(object sender, EventArgs e)
         {
-
+           
         }
     }
 

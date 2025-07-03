@@ -19,9 +19,9 @@ namespace CSharpTcpDemo
 {
     public partial class Form1 : Form
     {
-        private Feedback mFeedback = new Feedback();
-         private DobotMove mDobotMove = new DobotMove();
-        private Dashboard mDashboard = new Dashboard();
+        public Feedback mFeedback = new Feedback();
+         public DobotMove mDobotMove = new DobotMove();
+        public Dashboard mDashboard = new Dashboard();
 
         //定时获取数据并显示到UI
         private System.Timers.Timer mTimer = new System.Timers.Timer(300);
@@ -35,7 +35,7 @@ namespace CSharpTcpDemo
 
         private static Form1 _instance;
 
-        private RobotConnectionManager robotManager;
+        public RobotConnectionManager robotManager;
 
         public static Form1 Instance
         {
