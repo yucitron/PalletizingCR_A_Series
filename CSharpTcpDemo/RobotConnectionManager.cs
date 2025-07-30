@@ -63,7 +63,7 @@ namespace CSharpTcpDemo
 
         public Feedback Feedback => mFeedback;
 
-        #endregion
+        
 
         #region Connection Management
 
@@ -111,7 +111,7 @@ namespace CSharpTcpDemo
                 }
             };
         }
-
+        #endregion
         /// <summary>
         /// Robot'a bağlan
         /// </summary>
@@ -125,7 +125,7 @@ namespace CSharpTcpDemo
 
             string strIp = "192.168.5.1";
             int iPortFeedback = 30004;
-            int iPortMove = 30003;
+            //int iPortMove = 30003;
             int iPortDashboard = 29999;
 
             LogMessage("Connecting to robot...");
@@ -140,15 +140,7 @@ namespace CSharpTcpDemo
                         return;
                     }
                     LogMessage($"Dashboard connected: {strIp}:{iPortDashboard}");
-
-                    // Move bağlantısı
-                    if (!mDashboard.Connect(strIp, iPortMove))
-                    {
-                        LogMessage($"Move connection failed: {strIp}:{iPortMove}");
-                        return;
-                    }
-                    LogMessage($"Move connected: {strIp}:{iPortMove}");
-
+                    
                     // Feedback bağlantısı
                     if (!mFeedback.Connect(strIp, iPortFeedback))
                     {
@@ -194,7 +186,7 @@ namespace CSharpTcpDemo
 
                 // Bağlantıları kapat (API'nizde disconnect metodları varsa)
                 try { mDashboard?.Disconnect(); } catch { }
-                try { mDashboard?.Disconnect(); } catch { }
+                
                 try { mFeedback?.Disconnect(); } catch { }
 
                 IsConnected = false;
