@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace CSharpTcpDemo.com.dobot.api
 {
-  public class Feedback : DobotClient
+   public  class Feedback : DobotClient
     {
         private Thread mThread;
 
-        public FeedbackData feedbackData { get;  set; }
+        public FeedbackData feedbackData { get; private set; }
 
         public bool DataHasRead { get; set; }
 
@@ -71,10 +71,10 @@ namespace CSharpTcpDemo.com.dobot.api
                     }
 
                     bool bHasFound = false;//是否找到数据包头了
-                    for (int i=0; i<iHasRead; ++i)
+                    for (int i = 0; i < iHasRead; ++i)
                     {
                         //找到消息头
-                        int iMsgSize = buffer[i+1];
+                        int iMsgSize = buffer[i + 1];
                         iMsgSize <<= 8;
                         iMsgSize |= buffer[i];
                         iMsgSize &= 0x00FFFF;
@@ -90,7 +90,7 @@ namespace CSharpTcpDemo.com.dobot.api
                             if (i != 0)
                             {//说明存在粘包，要把前面的数据清理掉
                                 iHasRead = iHasRead - i;
-                                Array.Copy(buffer, i, buffer, 0, buffer.Length-i);
+                                Array.Copy(buffer, i, buffer, 0, buffer.Length - i);
                             }
                             break;
                         }
@@ -373,6 +373,12 @@ namespace CSharpTcpDemo.com.dobot.api
                 feedbackData.Reserved6[i] = buffer[iStartIndex];
                 iStartIndex += 1;
             }
+
+            feedbackData.VibrationDisZ = buffer[iStartIndex];
+            iStartIndex += 8;
+
+            feedbackData.CurrentCommandID = buffer[iStartIndex];
+            iStartIndex += 8;
 
             for (int i = 0; i < feedbackData.MActual.Length; ++i)
             {

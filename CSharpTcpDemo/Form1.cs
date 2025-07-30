@@ -20,7 +20,7 @@ namespace CSharpTcpDemo
     public partial class Form1 : Form
     {
         public Feedback mFeedback = new Feedback();
-         public DobotMove mDobotMove = new DobotMove();
+         
         public Dashboard mDashboard = new Dashboard();
 
         //定时获取数据并显示到UI
@@ -112,7 +112,7 @@ namespace CSharpTcpDemo
                     PrintLog(string.Format("Connect {0}:{1} Fail!!", strIp, iPortDashboard));
                     return;
                 }
-                if (!mDobotMove.Connect(strIp, iPortMove))
+                if (!mDashboard.Connect(strIp, iPortMove))
                 {
                     PrintLog(string.Format("Connect {0}:{1} Fail!!", strIp, iPortMove));
                     return;

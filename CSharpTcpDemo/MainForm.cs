@@ -14,7 +14,7 @@ namespace CSharpTcpDemo
     {
         private Feedback mFeedback = new Feedback();
 
-         private DobotMove mDobotMove = new DobotMove();
+        
         private Dashboard mDashboard = new Dashboard();
 
         //定时获取数据并显示到UI
@@ -31,7 +31,7 @@ namespace CSharpTcpDemo
             this.textBoxSpeedRatio.Text = "10";
 
             mFeedback.NetworkErrorEvent += new DobotClient.OnNetworkError(this.OnNetworkErrorEvent_Feedback);
-             mDobotMove.NetworkErrorEvent += new DobotClient.OnNetworkError(this.OnNetworkErrorEvent_DobotMove);
+             
             mDashboard.NetworkErrorEvent += new DobotClient.OnNetworkError(this.OnNetworkErrorEvent_Dashboard);
 
             #region +按钮事件
@@ -204,7 +204,7 @@ namespace CSharpTcpDemo
         {
             PrintLog(string.Format("send to {0}:{1}: MoveJog({2})", mDashboard.IP,mDashboard.Port,str));
             Thread thd = new Thread(() => {
-                string ret = mDobotMove.MoveJog(str);
+                string ret = mDashboard.MoveJog(str);
                 PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
             });
             thd.Start();
@@ -214,7 +214,7 @@ namespace CSharpTcpDemo
         {
             PrintLog(string.Format("send to {0}:{1}: MoveJog()", mDashboard.IP, mDashboard.Port));
             Thread thd = new Thread(() => {
-                string ret = mDobotMove.StopMoveJog();
+                string ret = mDashboard.StopMoveJog();
                 PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
             });
             thd.Start();
@@ -378,7 +378,7 @@ namespace CSharpTcpDemo
             PrintLog("Disconnecting...");
             Thread thd = new Thread(() => {
                 mFeedback.Disconnect();
-                mDobotMove.Disconnect();
+               
                 mDashboard.Disconnect();
                 PrintLog("Disconnect success!!!");
 
@@ -470,7 +470,7 @@ namespace CSharpTcpDemo
                 {
                     mDashboard.EnableRobot();
                 }
-                string ret = mDobotMove.MovJ(pt);
+                string ret = mDashboard.MovJ(pt);
                 PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
             });
             thd.Start();
@@ -492,7 +492,7 @@ namespace CSharpTcpDemo
                 {
                     mDashboard.EnableRobot();
                 }
-                string ret = mDobotMove.MovL(pt);
+                string ret = mDashboard.MovL(pt);
                 PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
             });
             thd.Start();
@@ -514,7 +514,7 @@ namespace CSharpTcpDemo
                 {
                     mDashboard.EnableRobot();
                 }
-                string ret = mDobotMove.JointMovJ(pt);
+                string ret = mDashboard.JointMovJ(pt);
                 PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
             });
             thd.Start();

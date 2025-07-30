@@ -47,7 +47,7 @@ namespace CSharpTcpDemo
 
         // Robot bağlantı nesneleri - private field'lar
         private Feedback mFeedback;
-        private DobotMove mDobotMove;
+        
         private Dashboard mDashboard;
 
         // Timer'lar - bağlantı süresince aktif kalacak
@@ -59,7 +59,8 @@ namespace CSharpTcpDemo
 
         // Robot komponentlerine erişim için public property'ler
         public Dashboard Dashboard => mDashboard;
-        public DobotMove DobotMove => mDobotMove;
+       
+
         public Feedback Feedback => mFeedback;
 
         #endregion
@@ -72,7 +73,7 @@ namespace CSharpTcpDemo
         private void InitializeConnections()
         {
             mFeedback = new Feedback();
-            mDobotMove = new DobotMove();
+           
             mDashboard = new Dashboard();
             mTimer = new System.Timers.Timer(300);
             mTimerReader = new System.Timers.Timer(300);
@@ -141,7 +142,7 @@ namespace CSharpTcpDemo
                     LogMessage($"Dashboard connected: {strIp}:{iPortDashboard}");
 
                     // Move bağlantısı
-                    if (!mDobotMove.Connect(strIp, iPortMove))
+                    if (!mDashboard.Connect(strIp, iPortMove))
                     {
                         LogMessage($"Move connection failed: {strIp}:{iPortMove}");
                         return;
@@ -193,7 +194,7 @@ namespace CSharpTcpDemo
 
                 // Bağlantıları kapat (API'nizde disconnect metodları varsa)
                 try { mDashboard?.Disconnect(); } catch { }
-                try { mDobotMove?.Disconnect(); } catch { }
+                try { mDashboard?.Disconnect(); } catch { }
                 try { mFeedback?.Disconnect(); } catch { }
 
                 IsConnected = false;

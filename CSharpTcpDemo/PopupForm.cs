@@ -19,7 +19,7 @@ namespace CSharpTcpDemo
 
 
         private Feedback mFeedback = new Feedback();
-         private DobotMove mDobotMove = new DobotMove();
+         
         private Dashboard mDashboard = new Dashboard();
 
         //定时获取数据并显示到UI
@@ -130,7 +130,7 @@ namespace CSharpTcpDemo
         {
             form1.PrintLog(string.Format("send to {0}:{1}: MoveJog({2})", mDashboard.IP, mDashboard.Port, str));
             Thread thd = new Thread(() => {
-                string ret = mDobotMove.MoveJog(str);
+                string ret = mDashboard.MoveJog(str);
                 form1.PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
             });
             thd.Start();

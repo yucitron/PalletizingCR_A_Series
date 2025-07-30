@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CSharpTcpDemo.com.dobot.api
 {
-  public  class FeedbackData
+   public class FeedbackData
     {
         #region 机器人模式
         public const int NO_CONTROLLER = -1;
@@ -97,7 +97,9 @@ namespace CSharpTcpDemo.com.dobot.api
         public byte JawButtonSignal = 0; //按钮板夹爪控制信号
         public byte SixForceOnline = 0;//六维力在线状态
 
-        public byte[] Reserved6 = new byte[82];//保留位
+        public byte[] Reserved6 = new byte[66]; // 保留位2
+        public double VibrationDisZ = 0; // 加速度计测量Z轴抖动位移
+        public ulong CurrentCommandID = 0; // 当前命令ID
 
         public double[] MActual = new double[6];//实际扭矩
         public double Load = 0;//负载重量kg

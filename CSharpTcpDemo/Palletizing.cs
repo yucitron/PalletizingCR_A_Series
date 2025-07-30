@@ -25,7 +25,7 @@ namespace CSharpTcpDemo
 
         private Feedback mFeedback = new Feedback();
         private Dashboard mDashboard = new Dashboard();
-        private DobotMove mDobotMove = new DobotMove();
+        
 
 
         private RobotConnectionManager robotManager;
@@ -214,7 +214,7 @@ namespace CSharpTcpDemo
             robotManager = RobotConnectionManager.Instance;
             mFeedback = robotManager.Feedback;
             mDashboard = robotManager.Dashboard;
-            mDobotMove = robotManager.DobotMove;
+            
         }
 
         public void PrintLog2(string str)
@@ -378,7 +378,7 @@ namespace CSharpTcpDemo
                    {
                        try
                        {
-                           string ret = mDobotMove.MovL(pt1);
+                           string ret = mDashboard.MovL(pt1);
                            PrintLog($"Cevap alındı: {ret}");
                            PrintLog2($"Cevap alındı: {ret}");
                        }
@@ -396,7 +396,7 @@ namespace CSharpTcpDemo
                     {
                         try
                         {
-                            string ret = mDobotMove.MovL(GlobalVeri.PickPoint);
+                            string ret = mDashboard.MovL(GlobalVeri.PickPoint);
                             PrintLog($"Cevap alındı: {ret}");
                             PrintLog2($"Cevap alındı: {ret}");
                         }
