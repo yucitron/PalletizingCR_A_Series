@@ -358,6 +358,7 @@
             this.btnMinus1.TabIndex = 3;
             this.btnMinus1.Text = "J1-";
             this.btnMinus1.UseVisualStyleBackColor = true;
+            this.btnMinus1.Click += new System.EventHandler(this.btnMinus1_Click);
             // 
             // labDO
             // 
@@ -506,16 +507,13 @@
             this.ClientSize = new System.Drawing.Size(694, 470);
             this.Controls.Add(this.groupBox3);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Location = new System.Drawing.Point(0, 0);
             this.Name = "PopupForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Jog+ -";
             this.Load += new System.EventHandler(this.PopupForm_Load);
-            this.Controls.SetChildIndex(this.groupBox3, 0);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
