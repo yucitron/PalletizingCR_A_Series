@@ -40,7 +40,7 @@ namespace CSharpTcpDemo
         private Boxes Boxes = new Boxes();
         public List<KutuNesnesi> kutular;
         public int pltHeight = 10;
-
+        
 
 
         private PopupForm popupForm = null;
@@ -413,12 +413,31 @@ namespace CSharpTcpDemo
                     PrintLog2($"Oran({oran})");
 
                     PrintLog2($"Adx({Adx})");
-                    
-                   Thread thd1 = new Thread(() =>                                      //////Safe Pick Point
+
+                    Thread thd0 = new Thread(() =>                                      //////Safe Pick Point
+                    {
+                        try
+                        {
+                            string ret = mDashboard.CP(100);
+                            PrintLog($"Cevap alındı: {ret}");
+                            PrintLog2($"Cevap alındı: {ret}");
+                        }
+                        catch (Exception ex)
+                        {
+                            PrintLog($"Hareket hatası: {ex.Message}");
+                            PrintLog2($"Hareket hatası: {ex.Message}");
+                        }
+                    });
+
+                    thd0.Start();
+                    Thread.Sleep(500); // 500ms bekleme*/
+
+
+                    Thread thd1 = new Thread(() =>                                      //////Safe Pick Point
                    {
                        try
                        {
-                           string ret = mDashboard.MovL(GlobalVeri.SafePickPoint);
+                           string ret = mDashboard.MovJ(GlobalVeri.SafePickPoint);
                            PrintLog($"Cevap alındı: {ret}");
                            PrintLog2($"Cevap alındı: {ret}");
                        }
@@ -436,7 +455,7 @@ namespace CSharpTcpDemo
                     {
                         try
                         {
-                            string ret = mDashboard.MovL(GlobalVeri.PickPoint);
+                            string ret = mDashboard.MovJ(GlobalVeri.PickPoint);
                             PrintLog($"Cevap alındı: {ret}");
                             PrintLog2($"Cevap alındı: {ret}");
                         }
@@ -457,7 +476,7 @@ namespace CSharpTcpDemo
                     {
                         try
                         {
-                            string ret = mDashboard.MovL(GlobalVeri.SafePickPoint);
+                            string ret = mDashboard.MovJ(GlobalVeri.SafePickPoint);
                             PrintLog($"Cevap alındı: {ret}");
                             PrintLog2($"Cevap alındı: {ret}");
                         }
@@ -477,7 +496,7 @@ namespace CSharpTcpDemo
                     {
                         try
                         {
-                            string ret = mDashboard.MovL(GlobalVeri.TransitionPoint);
+                            string ret = mDashboard.MovJ(GlobalVeri.TransitionPoint);
                             PrintLog($"Cevap alındı: {ret}");
                             PrintLog2($"Cevap alındı: {ret}");
                         }

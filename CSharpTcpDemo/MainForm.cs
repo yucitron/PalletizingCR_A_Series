@@ -19,7 +19,7 @@ namespace CSharpTcpDemo
         //定时获取数据并显示到UI
         public System.Timers.Timer mTimerReader = new System.Timers.Timer(300);
 
-        
+        public int cp;
         public MainForm()
         {
             InitializeComponent();
