@@ -128,7 +128,6 @@
             this.btnAddRZ.TabIndex = 3;
             this.btnAddRZ.Text = "Rz+";
             this.btnAddRZ.UseVisualStyleBackColor = true;
-           
             // 
             // btnAdd6
             // 
@@ -169,7 +168,6 @@
             this.btnAddRY.TabIndex = 3;
             this.btnAddRY.Text = "Ry+";
             this.btnAddRY.UseVisualStyleBackColor = true;
-            
             // 
             // btnAdd5
             // 
@@ -511,6 +509,7 @@
             this.Name = "PopupForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Jog+ -";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PopupForm_FormClosing);
             this.Load += new System.EventHandler(this.PopupForm_Load);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();

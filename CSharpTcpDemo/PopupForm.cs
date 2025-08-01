@@ -148,8 +148,9 @@ namespace CSharpTcpDemo
             }
 
             // UI güncellemesi için Invoke kullan
-            if (this.InvokeRequired)
+            if ( this.InvokeRequired)
             {
+                
                 this.Invoke(new Action(() => {
                     ShowDataResult();
                 }));
@@ -189,6 +190,10 @@ namespace CSharpTcpDemo
 
         private void ShowDataResult()
         {
+            // Form dispose kontrolü
+            if (this.IsDisposed || this.Disposing)
+                return;
+
             if (mFeedback?.feedbackData == null) return;
 
             try
@@ -196,33 +201,48 @@ namespace CSharpTcpDemo
                 // Joint pozisyonları
                 if (null != mFeedback.feedbackData.QActual && mFeedback.feedbackData.QActual.Length >= 6)
                 {
-                    this.labJ1.Text = string.Format("J1:{0:F3}", mFeedback.feedbackData.QActual[0]);
-                    this.labJ2.Text = string.Format("J2:{0:F3}", mFeedback.feedbackData.QActual[1]);
-                    this.labJ3.Text = string.Format("J3:{0:F3}", mFeedback.feedbackData.QActual[2]);
-                    this.labJ4.Text = string.Format("J4:{0:F3}", mFeedback.feedbackData.QActual[3]);
-                    this.labJ5.Text = string.Format("J5:{0:F3}", mFeedback.feedbackData.QActual[4]);
-                    this.labJ6.Text = string.Format("J6:{0:F3}", mFeedback.feedbackData.QActual[5]);
+                    if (!this.IsDisposed)
+                    {
+                        this.labJ1.Text = string.Format("J1:{0:F3}", mFeedback.feedbackData.QActual[0]);
+                        this.labJ2.Text = string.Format("J2:{0:F3}", mFeedback.feedbackData.QActual[1]);
+                        this.labJ3.Text = string.Format("J3:{0:F3}", mFeedback.feedbackData.QActual[2]);
+                        this.labJ4.Text = string.Format("J4:{0:F3}", mFeedback.feedbackData.QActual[3]);
+                        this.labJ5.Text = string.Format("J5:{0:F3}", mFeedback.feedbackData.QActual[4]);
+                        this.labJ6.Text = string.Format("J6:{0:F3}", mFeedback.feedbackData.QActual[5]);
+                    }
                 }
 
                 // Kartezyen pozisyonları
                 if (null != mFeedback.feedbackData.ToolVectorActual && mFeedback.feedbackData.ToolVectorActual.Length >= 6)
                 {
-                    this.labX.Text = string.Format("X:{0:F3}", mFeedback.feedbackData.ToolVectorActual[0]);
-                    this.labY.Text = string.Format("Y:{0:F3}", mFeedback.feedbackData.ToolVectorActual[1]);
-                    this.labZ.Text = string.Format("Z:{0:F3}", mFeedback.feedbackData.ToolVectorActual[2]);
-                    this.labRx.Text = string.Format("Rx:{0:F3}", mFeedback.feedbackData.ToolVectorActual[3]);
-                    this.labRy.Text = string.Format("Ry:{0:F3}", mFeedback.feedbackData.ToolVectorActual[4]);
-                    this.labRz.Text = string.Format("Rz:{0:F3}", mFeedback.feedbackData.ToolVectorActual[5]);
+                    if (!this.IsDisposed)
+                    {
+                        this.labX.Text = string.Format("X:{0:F3}", mFeedback.feedbackData.ToolVectorActual[0]);
+                        this.labY.Text = string.Format("Y:{0:F3}", mFeedback.feedbackData.ToolVectorActual[1]);
+                        this.labZ.Text = string.Format("Z:{0:F3}", mFeedback.feedbackData.ToolVectorActual[2]);
+                        this.labRx.Text = string.Format("Rx:{0:F3}", mFeedback.feedbackData.ToolVectorActual[3]);
+                        this.labRy.Text = string.Format("Ry:{0:F3}", mFeedback.feedbackData.ToolVectorActual[4]);
+                        this.labRz.Text = string.Format("Rz:{0:F3}", mFeedback.feedbackData.ToolVectorActual[5]);
+                    }
                 }
 
                 // Hata kontrolü
-                ParseWarn();
+                if (!this.IsDisposed)
+                {
+                    ParseWarn();
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Form dispose edilmişse timer'ı durdur
+                mTimerReader?.Stop();
             }
             catch (Exception ex)
             {
                 // Hata durumunda log'a yaz
                 System.Diagnostics.Debug.WriteLine($"ShowDataResult error: {ex.Message}");
             }
+        
         }
 
         private void ParseWarn()
@@ -279,6 +299,21 @@ namespace CSharpTcpDemo
                                   "Robot Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }));
             }
+
+        
+
+            if (sb.Length > 0)
+            {
+                DateTime dt = DateTime.Now;
+                string strTime = string.Format("Time Stamp:{0}.{1}.{2} {3}:{4}:{5}", dt.Year,
+                    dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
+
+                // Error'u popup olarak göster
+                this.BeginInvoke(new Action(() => {
+                    MessageBox.Show(this, strTime + "\r\n" + sb.ToString(),
+                                  "Robot Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }));
+            }
         }
 
         // Log mesajlarını almak için event handler
@@ -308,6 +343,18 @@ namespace CSharpTcpDemo
         {
             robotManager?.CheckConnection();
             UpdateConnectionStatus();
+        }
+
+        private void PopupForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            mTimerReader?.Stop();
+            mTimerReader?.Close();
+
+            // Log event'ından unsubscribe ol
+            if (robotManager != null)
+            {
+                robotManager.LogReceived -= OnLogReceived;
+            }
         }
     }
 }

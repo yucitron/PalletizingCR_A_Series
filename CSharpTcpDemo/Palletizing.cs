@@ -414,11 +414,11 @@ namespace CSharpTcpDemo
 
                     PrintLog2($"Adx({Adx})");
                     
-                   Thread thd1 = new Thread(() =>
+                   Thread thd1 = new Thread(() =>                                      //////Safe Pick Point
                    {
                        try
                        {
-                           string ret = mDashboard.MovL(pt1);
+                           string ret = mDashboard.MovL(GlobalVeri.SafePickPoint);
                            PrintLog($"Cevap alındı: {ret}");
                            PrintLog2($"Cevap alındı: {ret}");
                        }
@@ -432,11 +432,11 @@ namespace CSharpTcpDemo
                    thd1.Start();
                    Thread.Sleep(500); // 500ms bekleme*/
                     
-                    Thread thd2 = new Thread(() =>
+                    Thread thd2 = new Thread(() =>                //////Pick Point
                     {
                         try
                         {
-                            string ret = mDashboard.MovL(GlobalVeri.SafePickPoint);
+                            string ret = mDashboard.MovL(GlobalVeri.PickPoint);
                             PrintLog($"Cevap alındı: {ret}");
                             PrintLog2($"Cevap alındı: {ret}");
                         }
@@ -445,16 +445,19 @@ namespace CSharpTcpDemo
                             PrintLog($"Hareket hatası: {ex.Message}");
                             PrintLog2($"Hareket hatası: {ex.Message}");
                         }
+                        ///////////////////
+                        ///
+                       
                     });
 
                     thd2.Start();
                     Thread.Sleep(500); // 500ms bekleme*/
 
-                    Thread thd3 = new Thread(() =>
+                    Thread thd3 = new Thread(() =>      //////Safe Pick Point
                     {
                         try
                         {
-                            string ret = mDashboard.MovL(GlobalVeri.PickPoint);
+                            string ret = mDashboard.MovL(GlobalVeri.SafePickPoint);
                             PrintLog($"Cevap alındı: {ret}");
                             PrintLog2($"Cevap alındı: {ret}");
                         }
@@ -470,11 +473,11 @@ namespace CSharpTcpDemo
 
 
                     
-                    Thread thd4 = new Thread(() =>
+                    Thread thd4 = new Thread(() =>          //////Transition Pick Point
                     {
                         try
                         {
-                            string ret = mDashboard.MovL(GlobalVeri.SafePickPoint);
+                            string ret = mDashboard.MovL(GlobalVeri.TransitionPoint);
                             PrintLog($"Cevap alındı: {ret}");
                             PrintLog2($"Cevap alındı: {ret}");
                         }
@@ -486,6 +489,43 @@ namespace CSharpTcpDemo
                     });
                     
                     thd4.Start();
+                    Thread.Sleep(500); // 500ms bekleme*/
+
+
+                    Thread thd5 = new Thread(() =>   //// BOX POİNT
+                    {
+                        try
+                        {
+                            string ret = mDashboard.MovL(pt1);
+                            PrintLog($"Cevap alındı: {ret}");
+                            PrintLog2($"Cevap alındı: {ret}");
+                        }
+                        catch (Exception ex)
+                        {
+                            PrintLog($"Hareket hatası: {ex.Message}");
+                            PrintLog2($"Hareket hatası: {ex.Message}");
+                        }
+                    });
+
+                    thd5.Start();
+                    Thread.Sleep(500); // 500ms bekleme*/
+
+                    Thread thd6 = new Thread(() =>          //////Transition Pick Point
+                    {
+                        try
+                        {
+                            string ret = mDashboard.MovL(GlobalVeri.TransitionPoint);
+                            PrintLog($"Cevap alındı: {ret}");
+                            PrintLog2($"Cevap alındı: {ret}");
+                        }
+                        catch (Exception ex)
+                        {
+                            PrintLog($"Hareket hatası: {ex.Message}");
+                            PrintLog2($"Hareket hatası: {ex.Message}");
+                        }
+                    });
+
+                    thd6.Start();
                     Thread.Sleep(500); // 500ms bekleme*/
 
                 }
@@ -648,7 +688,7 @@ namespace CSharpTcpDemo
                 ry = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[4]),
                 rz = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[5])
             };
-            PrintLog2($" Picking is: {GlobalVeri.TransitionPoint} ");
+            PrintLog2($" Transition is: {GlobalVeri.TransitionPoint} ");
         }
     }
 }

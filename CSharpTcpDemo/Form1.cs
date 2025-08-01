@@ -198,20 +198,8 @@ namespace CSharpTcpDemo
             thd.Start();
         }
 
-        /*public void InsertLogToRichBox(RichTextBox box, string str)
-        {
-            if (box.GetLineFromCharIndex(box.TextLength) > 100)
-            {
-                box.Text = (str += "\r\n");
-            }
-            else
-            {
-                box.Text += (str + "\r\n");
-            }
-            box.Focus();
-            box.Select(box.TextLength, 0);
-            box.ScrollToCaret();
-        }*/
+       
+
 
         public void PrintLog(string str)
         {
