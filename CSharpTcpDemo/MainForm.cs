@@ -12,14 +12,14 @@ namespace CSharpTcpDemo
 {
     public partial class MainForm : Form
     {
-        private Feedback mFeedback = new Feedback();
-
-        
-        private Dashboard mDashboard = new Dashboard();
+        public Feedback mFeedback = new Feedback();
+        // private DobotMove mDobotMove = new DobotMove();
+        public Dashboard mDashboard = new Dashboard();
 
         //定时获取数据并显示到UI
-        private System.Timers.Timer mTimerReader = new System.Timers.Timer(300);
+        public System.Timers.Timer mTimerReader = new System.Timers.Timer(300);
 
+        
         public MainForm()
         {
             InitializeComponent();
@@ -31,7 +31,7 @@ namespace CSharpTcpDemo
             this.textBoxSpeedRatio.Text = "10";
 
             mFeedback.NetworkErrorEvent += new DobotClient.OnNetworkError(this.OnNetworkErrorEvent_Feedback);
-             
+            // mDobotMove.NetworkErrorEvent += new DobotClient.OnNetworkError(this.OnNetworkErrorEvent_DobotMove);
             mDashboard.NetworkErrorEvent += new DobotClient.OnNetworkError(this.OnNetworkErrorEvent_Dashboard);
 
             #region +按钮事件
@@ -78,8 +78,10 @@ namespace CSharpTcpDemo
             DisableWindow();
 
             string strPath = System.Windows.Forms.Application.StartupPath + "\\";
-            ErrorInfoHelper.ParseControllerJsonFile(strPath+ "alarm_controller.json");
+            ErrorInfoHelper.ParseControllerJsonFile(strPath + "alarm_controller.json");
             ErrorInfoHelper.ParseServoJsonFile(strPath + "alarm_servo.json");
+
+            
         }
 
         private void BindBtn_MoveEvent(Button btn, string strTag)
@@ -91,8 +93,7 @@ namespace CSharpTcpDemo
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-          //  mTimerReader.Close();
-            /*
+            mTimerReader.Close();
             if (this.mFeedback != null)
             {
                 this.mFeedback.Disconnect();
@@ -105,7 +106,6 @@ namespace CSharpTcpDemo
             {
                 this.mDashboard.Disconnect();
             }
-            */
         }
         private void InsertLogToRichBox(RichTextBox box, string str)
         {
@@ -174,7 +174,7 @@ namespace CSharpTcpDemo
                 }
             }
         }
-        public void EnableWindow()
+        private void EnableWindow()
         {
             foreach (Control ctr in this.Controls)
             {
@@ -200,9 +200,9 @@ namespace CSharpTcpDemo
             }
         }
 
-        public void DoMoveJog(string str)
+        private void DoMoveJog(string str)
         {
-            PrintLog(string.Format("send to {0}:{1}: MoveJog({2})", mDashboard.IP,mDashboard.Port,str));
+            PrintLog(string.Format("send to {0}:{1}: MoveJog({2})", mDashboard.IP, mDashboard.Port, str));
             Thread thd = new Thread(() => {
                 string ret = mDashboard.MoveJog(str);
                 PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
@@ -210,7 +210,7 @@ namespace CSharpTcpDemo
             thd.Start();
         }
 
-        public void DoStopMoveJog()
+        private void DoStopMoveJog()
         {
             PrintLog(string.Format("send to {0}:{1}: MoveJog()", mDashboard.IP, mDashboard.Port));
             Thread thd = new Thread(() => {
@@ -219,7 +219,7 @@ namespace CSharpTcpDemo
             });
             thd.Start();
         }
-        public void TimeoutEvent(object sender, System.Timers.ElapsedEventArgs e)
+        private void TimeoutEvent(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (!mFeedback.DataHasRead)
             {
@@ -250,7 +250,7 @@ namespace CSharpTcpDemo
             }
             return true;
         }
-        public int Parse2Int(string str)
+        private int Parse2Int(string str)
         {
             int iValue = 0;
             try
@@ -259,7 +259,6 @@ namespace CSharpTcpDemo
             }
             catch
             {
-                MessageBox.Show("integer deger giriniz");
             }
             return iValue;
         }
@@ -296,9 +295,9 @@ namespace CSharpTcpDemo
 
                 PrintLog("Connect Success!!!");
 
-                
-                   // EnableWindow();
-                
+                this.Invoke(new Action(() => {
+                    EnableWindow();
+                }));
             });
             thd.Start();
         }
@@ -307,25 +306,25 @@ namespace CSharpTcpDemo
         /// </summary>
         /// <param name="sender">发送错误的对象</param>
         /// <param name="iErrCode">网络错误码</param>
-        public void OnNetworkErrorEvent_Feedback(DobotClient sender, SocketError iErrCode)
+        private void OnNetworkErrorEvent_Feedback(DobotClient sender, SocketError iErrCode)
         {
             if (mIsManualDisconnect) return;
-            this.BeginInvoke(new Action(()=> {
+            this.BeginInvoke(new Action(() => {
                 string strIp = textBoxIP.Text;
                 int iPort = Parse2Int(this.textBoxFeedbackPort.Text);
                 DoNetworkErrorEvent(mFeedback, strIp, iPort);
             }));
         }
-        private void OnNetworkErrorEvent_DobotMove(DobotClient sender, SocketError iErrCode)
-        {
-            if (mIsManualDisconnect) return;
-            this.BeginInvoke(new Action(() => {
-                string strIp = textBoxIP.Text;
-                int iPort =30003;
-                DoNetworkErrorEvent(mDashboard, strIp, iPort);
-            }));
-        }
-        public void OnNetworkErrorEvent_Dashboard(DobotClient sender, SocketError iErrCode)
+        //private void OnNetworkErrorEvent_DobotMove(DobotClient sender, SocketError iErrCode)
+        //{
+        //  if (mIsManualDisconnect) return;
+        //  this.BeginInvoke(new Action(() => {
+        //     string strIp = textBoxIP.Text;
+        //     int iPort = Parse2Int(this.textBoxMovePort.Text);
+        //     DoNetworkErrorEvent(mDashboard, strIp, iPort);
+        //  }));
+        //  }
+        private void OnNetworkErrorEvent_Dashboard(DobotClient sender, SocketError iErrCode)
         {
             if (mIsManualDisconnect) return;
             this.BeginInvoke(new Action(() => {
@@ -335,12 +334,12 @@ namespace CSharpTcpDemo
             }));
         }
 
-        public void Connect()
+        private void Connect()
         {
-            string strIp = "192.168.5.1";
-            int iPortFeedback = 30004;
-            int iPortMove = 30003;
-            int iPortDashboard = 29999;
+            string strIp = textBoxIP.Text;
+            int iPortFeedback = Parse2Int(this.textBoxFeedbackPort.Text);
+            //int iPortMove = Parse2Int(this.textBoxMovePort.Text);
+            int iPortDashboard = Parse2Int(this.textBoxDashboardPort.Text);
 
             PrintLog("Connecting...");
             Thread thd = new Thread(() => {
@@ -349,11 +348,11 @@ namespace CSharpTcpDemo
                     PrintLog(string.Format("Connect {0}:{1} Fail!!", strIp, iPortDashboard));
                     return;
                 }
-                if (!mDashboard.Connect(strIp, iPortMove))
-                {
-                    PrintLog(string.Format("Connect {0}:{1} Fail!!", strIp, iPortMove));
-                    return;
-                }
+                //if (!mDashboard.Connect(strIp, iPortMove))
+                //{
+                //  PrintLog(string.Format("Connect {0}:{1} Fail!!", strIp, iPortMove));
+                //  return;
+                // }
                 if (!mFeedback.Connect(strIp, iPortFeedback))
                 {
                     PrintLog(string.Format("Connect {0}:{1} Fail!!", strIp, iPortFeedback));
@@ -365,10 +364,10 @@ namespace CSharpTcpDemo
 
                 PrintLog("Connect Success!!!");
 
-                
-                   //  EnableWindow();
-                  //   this.btnConnect.Text = "Disconnect";
-                 
+                this.Invoke(new Action(() => {
+                    EnableWindow();
+                    this.btnConnect.Text = "Disconnect";
+                }));
             });
             thd.Start();
         }
@@ -378,7 +377,7 @@ namespace CSharpTcpDemo
             PrintLog("Disconnecting...");
             Thread thd = new Thread(() => {
                 mFeedback.Disconnect();
-               
+                mDashboard.Disconnect();
                 mDashboard.Disconnect();
                 PrintLog("Disconnect success!!!");
 
@@ -396,7 +395,7 @@ namespace CSharpTcpDemo
         {
             bool bEnable = this.btnEnable.Text.Equals("Enable");
 
-            PrintLog(string.Format("send to {0}:{1}: {2}()", mDashboard.IP, mDashboard.Port, bEnable? "EnableRobot" : "DisableRobot"));
+            PrintLog(string.Format("send to {0}:{1}: {2}()", mDashboard.IP, mDashboard.Port, bEnable ? "EnableRobot" : "DisableRobot"));
             Thread thd = new Thread(() => {
                 string ret = bEnable ? mDashboard.EnableRobot() : mDashboard.DisableRobot();
                 bool bOk = ret.StartsWith("0");
@@ -417,7 +416,7 @@ namespace CSharpTcpDemo
         {
             PrintLog(string.Format("send to {0}:{1}: ResetRobot()", mDashboard.IP, mDashboard.Port));
             Thread thd = new Thread(() => {
-                string ret = mDashboard.ResetRobot();
+                string ret = mDashboard.Stop();
                 PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
             });
             thd.Start();
@@ -464,7 +463,7 @@ namespace CSharpTcpDemo
             pt.ry = Parse2Double(this.textBoxRy.Text);
             pt.rz = Parse2Double(this.textBoxRz.Text);
 
-            PrintLog(string.Format("send to {0}:{1}: MovJ({2})", mDashboard.IP, mDashboard.Port,pt.ToString()));
+            PrintLog(string.Format("send to {0}:{1}: MovJ({2})", mDashboard.IP, mDashboard.Port, pt.ToString()));
             Thread thd = new Thread(() => {
                 if (mFeedback.IsEnabled())
                 {
@@ -498,7 +497,7 @@ namespace CSharpTcpDemo
             thd.Start();
         }
 
-        /*private void btnJointMovJ_Click(object sender, EventArgs e)
+        private void btnJointMovJ_Click(object sender, EventArgs e)
         {
             JointPoint pt = new JointPoint();
             pt.j1 = Parse2Double(this.textBoxJ1.Text);
@@ -518,7 +517,7 @@ namespace CSharpTcpDemo
                 PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
             });
             thd.Start();
-        }*/
+        }
 
         private void btnDOInput_Click(object sender, EventArgs e)
         {
@@ -636,47 +635,15 @@ namespace CSharpTcpDemo
             return;
         }
 
-        private void textBoxIP_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBoxMovePort_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBoxDashboardPort_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBoxFeedbackPort_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
+        
 
         private void button1_Click(object sender, EventArgs e)
         {
+            
+     
+
             this.Hide();
-            Form1 Form1 = new Form1();
-            Form1.Show();
-
-        }
-
-        private void btnMinus1_Click(object sender, EventArgs e)
-        {
-
+             
         }
     }
 }

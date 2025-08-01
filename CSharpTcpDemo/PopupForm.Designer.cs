@@ -128,6 +128,7 @@
             this.btnAddRZ.TabIndex = 3;
             this.btnAddRZ.Text = "Rz+";
             this.btnAddRZ.UseVisualStyleBackColor = true;
+           
             // 
             // btnAdd6
             // 
@@ -168,6 +169,7 @@
             this.btnAddRY.TabIndex = 3;
             this.btnAddRY.Text = "Ry+";
             this.btnAddRY.UseVisualStyleBackColor = true;
+            
             // 
             // btnAdd5
             // 
@@ -358,7 +360,6 @@
             this.btnMinus1.TabIndex = 3;
             this.btnMinus1.Text = "J1-";
             this.btnMinus1.UseVisualStyleBackColor = true;
-            this.btnMinus1.Click += new System.EventHandler(this.btnMinus1_Click);
             // 
             // labDO
             // 

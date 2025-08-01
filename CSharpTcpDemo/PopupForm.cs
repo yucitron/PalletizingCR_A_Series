@@ -13,31 +13,33 @@ using System.Windows.Forms;
 
 namespace CSharpTcpDemo
 {
-    public partial class PopupForm :Form
+    public partial class PopupForm : Form
     {
-        private Form1 form1 = new Form1();
-        private MainForm mainForm = new MainForm();
+        // RobotConnectionManager singleton'dan referansları al
+        private RobotConnectionManager robotManager;
+        public Feedback mFeedback => robotManager?.Feedback;
+        public Dashboard mDashboard => robotManager?.Dashboard;
 
-
-        private Feedback mFeedback = new Feedback();
-         
-        private Dashboard mDashboard = new Dashboard();
-
-        //定时获取数据并显示到UI
+        // Popup için kendi timer'ı
         private System.Timers.Timer mTimerReader = new System.Timers.Timer(300);
-
-
 
         public PopupForm()
         {
             InitializeComponent();
+
+            // Singleton instance'ı al
+            robotManager = RobotConnectionManager.Instance;
+
+            // Log event'ine subscribe ol
+            robotManager.LogReceived += OnLogReceived;
+
             SetupForm();
+            SetupButtons();
+            SetupTimer();
+        }
 
-            mFeedback.NetworkErrorEvent += new DobotClient.OnNetworkError(mainForm.OnNetworkErrorEvent_Feedback);
-            // mDobotMove.NetworkErrorEvent += new DobotClient.OnNetworkError(this.OnNetworkErrorEvent_DobotMove);
-            mDashboard.NetworkErrorEvent += new DobotClient.OnNetworkError(mainForm.OnNetworkErrorEvent_Dashboard);
-
-
+        private void SetupButtons()
+        {
             #region +按钮事件
             BindBtn_MoveEvent(this.btnAdd1, "J1+");
             BindBtn_MoveEvent(this.btnAdd2, "J2+");
@@ -73,11 +75,12 @@ namespace CSharpTcpDemo
             BindBtn_MoveEvent(this.btnMinusRY, "Ry-");
             BindBtn_MoveEvent(this.btnMinusRZ, "Rz-");
             #endregion
+        }
 
-            //启动定时器
-            mTimerReader.Elapsed += new System.Timers.ElapsedEventHandler(mainForm.TimeoutEvent);
+        private void SetupTimer()
+        {
+            mTimerReader.Elapsed += new System.Timers.ElapsedEventHandler(TimeoutEvent);
             mTimerReader.AutoReset = true;
-
         }
 
         private void BindBtn_MoveEvent(Button btn, string strTag)
@@ -96,6 +99,7 @@ namespace CSharpTcpDemo
                 DoMoveJog(str);
             }
         }
+
         private void OnStopMoveJogEvent(object sender, MouseEventArgs e)
         {
             if (sender is Button)
@@ -108,95 +112,128 @@ namespace CSharpTcpDemo
         private void SetupForm()
         {
             // Form properties
-            //this.Size = new Size(300, 400);
             this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
-           
             this.ShowInTaskbar = false;
             this.TopMost = true;
             this.StartPosition = FormStartPosition.Manual;
 
             int screenRightEdge = Screen.PrimaryScreen.WorkingArea.Right;
             int formX = screenRightEdge - 500;
-            int formY = 100; // dikey konum, ihtiyaca göre ayarlanabilir
+            int formY = 100;
 
             this.Location = new Point(formX, formY);
-
-            
         }
-
-        
-
-       
 
         private void DoMoveJog(string str)
         {
-            form1.PrintLog(string.Format("send to {0}:{1}: MoveJog({2})", mDashboard.IP, mDashboard.Port, str));
-            Thread thd = new Thread(() => {
-                string ret = mDashboard.MoveJog(str);
-                form1.PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
-            });
-            thd.Start();
+            // RobotConnectionManager'ın ExecuteCommand metodunu kullan
+            robotManager?.ExecuteCommand(() => {
+                return mDashboard?.MoveJog(str) ?? "Dashboard not available";
+            }, $"MoveJog({str})");
         }
+
         public void DoStopMoveJog()
         {
-            form1.PrintLog(string.Format("send to {0}:{1}: MoveJog()", mDashboard.IP, mDashboard.Port));
-            Thread thd = new Thread(() => {
-                string ret = mDashboard.StopMoveJog();
-                form1.PrintLog(string.Format("Receive From {0}:{1}: {2}", mDashboard.IP, mDashboard.Port, ret));
-            });
-            thd.Start();
+            // RobotConnectionManager'ın ExecuteCommand metodunu kullan
+            robotManager?.ExecuteCommand(() => {
+                return mDashboard?.StopMoveJog() ?? "Dashboard not available";
+            }, "StopMoveJog()");
         }
 
+        private void TimeoutEvent(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (!robotManager.IsConnected || mFeedback == null || !mFeedback.DataHasRead)
+            {
+                return;
+            }
 
+            // UI güncellemesi için Invoke kullan
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => {
+                    ShowDataResult();
+                }));
+            }
+            else
+            {
+                ShowDataResult();
+            }
+
+        }
 
         private void PopupForm_Load(object sender, EventArgs e)
         {
-           
+            // Bağlantı kontrolü
+            if (!robotManager.IsConnected)
+            {
+                // Otomatik bağlanmayı dene
+                robotManager.Connect();
+            }
+
+            // Timer'ı başlat
+            mTimerReader.Start();
         }
 
-        private void btnMinus1_Click(object sender, EventArgs e)
+        private void PopupForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-             
-            MessageBox.Show("Button 1 clicked!");
-        
+            // Timer'ı durdur
+            mTimerReader?.Stop();
+            mTimerReader?.Close();
+
+            // Log event'ından unsubscribe ol
+            if (robotManager != null)
+            {
+                robotManager.LogReceived -= OnLogReceived;
+            }
         }
+
         private void ShowDataResult()
         {
-            
+            if (mFeedback?.feedbackData == null) return;
 
-            if (null != mFeedback.feedbackData.QActual && mFeedback.feedbackData.QActual.Length >= 6)
+            try
             {
-                this.labJ1.Text = string.Format("J1:{0:F3}", mFeedback.feedbackData.QActual[0]);
-                this.labJ2.Text = string.Format("J2:{0:F3}", mFeedback.feedbackData.QActual[1]);
-                this.labJ3.Text = string.Format("J3:{0:F3}", mFeedback.feedbackData.QActual[2]);
-                this.labJ4.Text = string.Format("J4:{0:F3}", mFeedback.feedbackData.QActual[3]);
-                this.labJ5.Text = string.Format("J5:{0:F3}", mFeedback.feedbackData.QActual[4]);
-                this.labJ6.Text = string.Format("J6:{0:F3}", mFeedback.feedbackData.QActual[5]);
-            }
+                // Joint pozisyonları
+                if (null != mFeedback.feedbackData.QActual && mFeedback.feedbackData.QActual.Length >= 6)
+                {
+                    this.labJ1.Text = string.Format("J1:{0:F3}", mFeedback.feedbackData.QActual[0]);
+                    this.labJ2.Text = string.Format("J2:{0:F3}", mFeedback.feedbackData.QActual[1]);
+                    this.labJ3.Text = string.Format("J3:{0:F3}", mFeedback.feedbackData.QActual[2]);
+                    this.labJ4.Text = string.Format("J4:{0:F3}", mFeedback.feedbackData.QActual[3]);
+                    this.labJ5.Text = string.Format("J5:{0:F3}", mFeedback.feedbackData.QActual[4]);
+                    this.labJ6.Text = string.Format("J6:{0:F3}", mFeedback.feedbackData.QActual[5]);
+                }
 
-            if (null != mFeedback.feedbackData.ToolVectorActual && mFeedback.feedbackData.ToolVectorActual.Length >= 6)
+                // Kartezyen pozisyonları
+                if (null != mFeedback.feedbackData.ToolVectorActual && mFeedback.feedbackData.ToolVectorActual.Length >= 6)
+                {
+                    this.labX.Text = string.Format("X:{0:F3}", mFeedback.feedbackData.ToolVectorActual[0]);
+                    this.labY.Text = string.Format("Y:{0:F3}", mFeedback.feedbackData.ToolVectorActual[1]);
+                    this.labZ.Text = string.Format("Z:{0:F3}", mFeedback.feedbackData.ToolVectorActual[2]);
+                    this.labRx.Text = string.Format("Rx:{0:F3}", mFeedback.feedbackData.ToolVectorActual[3]);
+                    this.labRy.Text = string.Format("Ry:{0:F3}", mFeedback.feedbackData.ToolVectorActual[4]);
+                    this.labRz.Text = string.Format("Rz:{0:F3}", mFeedback.feedbackData.ToolVectorActual[5]);
+                }
+
+                // Hata kontrolü
+                ParseWarn();
+            }
+            catch (Exception ex)
             {
-                this.labX.Text = string.Format("X:{0:F3}", mFeedback.feedbackData.ToolVectorActual[0]);
-                this.labY.Text = string.Format("Y:{0:F3}", mFeedback.feedbackData.ToolVectorActual[1]);
-                this.labZ.Text = string.Format("Z:{0:F3}", mFeedback.feedbackData.ToolVectorActual[2]);
-                this.labRx.Text = string.Format("Rx:{0:F3}", mFeedback.feedbackData.ToolVectorActual[3]);
-                this.labRy.Text = string.Format("Ry:{0:F3}", mFeedback.feedbackData.ToolVectorActual[4]);
-                this.labRz.Text = string.Format("Rz:{0:F3}", mFeedback.feedbackData.ToolVectorActual[5]);
+                // Hata durumunda log'a yaz
+                System.Diagnostics.Debug.WriteLine($"ShowDataResult error: {ex.Message}");
             }
-
-            
-
-            ParseWarn();
         }
 
         private void ParseWarn()
         {
+            if (mFeedback?.feedbackData == null || mDashboard == null) return;
             if (this.mFeedback.feedbackData.RobotMode != FeedbackData.ROBOT_MODE_ERROR) return;
+
             string strResult = mDashboard.GetErrorID();
-            //strResult=ErrorID,{[[id,...,id], [id], [id], [id], [id], [id], [id]]},GetErrorID()
             if (!strResult.StartsWith("0")) return;
 
-            //截取第一个{}内容
+            // Error parsing işlemi (orijinal koddan)
             int iBegPos = strResult.IndexOf('{');
             if (iBegPos < 0) return;
             int iEndPos = strResult.IndexOf('}', iBegPos + 1);
@@ -204,7 +241,6 @@ namespace CSharpTcpDemo
             strResult = strResult.Substring(iBegPos + 1, iEndPos - iBegPos - 1);
             if (string.IsNullOrEmpty(strResult)) return;
 
-            //剩余7组[]，第1组是控制器报警，其他6组是伺服报警
             StringBuilder sb = new StringBuilder();
             JArray arrWarn = JArray.Parse(strResult);
             for (int i = 0; i < arrWarn.Count; ++i)
@@ -214,11 +250,11 @@ namespace CSharpTcpDemo
                 {
                     ErrorInfoBean bean = null;
                     if (0 == i)
-                    {//控制器报警
+                    {
                         bean = ErrorInfoHelper.FindController(arr[j].ToObject<int>());
                     }
                     else
-                    {//伺服报警
+                    {
                         bean = ErrorInfoHelper.FindServo(arr[j].ToObject<int>());
                     }
                     if (null != bean)
@@ -236,11 +272,42 @@ namespace CSharpTcpDemo
                 DateTime dt = DateTime.Now;
                 string strTime = string.Format("Time Stamp:{0}.{1}.{2} {3}:{4}:{5}", dt.Year,
                     dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
-              
+
+                // Error'u popup olarak göster
+                this.BeginInvoke(new Action(() => {
+                    MessageBox.Show(this, strTime + "\r\n" + sb.ToString(),
+                                  "Robot Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }));
             }
-            return;
+        }
+
+        // Log mesajlarını almak için event handler
+        private void OnLogReceived(string logMessage)
+        {
+            // İsterseniz popup'ta da log gösterebilirsiniz
+            // Veya sadece debug için kullanabilirsiniz
+            System.Diagnostics.Debug.WriteLine($"PopupForm Log: {logMessage}");
+        }
+
+        // Connection status'u kontrol etmek için yardımcı metod
+        private void UpdateConnectionStatus()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(UpdateConnectionStatus));
+                return;
+            }
+
+            // Bağlantı durumunu UI'da göstermek istiyorsanız
+            string status = robotManager?.GetConnectionStatus() ?? "Unknown";
+            this.Text = $"Robot Control - {status}";
+        }
+
+        // Timer ile periyodik bağlantı kontrolü
+        private void CheckConnectionStatus()
+        {
+            robotManager?.CheckConnection();
+            UpdateConnectionStatus();
         }
     }
-
 }
-

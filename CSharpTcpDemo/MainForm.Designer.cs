@@ -160,7 +160,7 @@
             this.textBoxIP.Name = "textBoxIP";
             this.textBoxIP.Size = new System.Drawing.Size(195, 26);
             this.textBoxIP.TabIndex = 1;
-            this.textBoxIP.TextChanged += new System.EventHandler(this.textBoxIP_TextChanged);
+            
             // 
             // label2
             // 
@@ -180,7 +180,7 @@
             this.textBoxDashboardPort.Name = "textBoxDashboardPort";
             this.textBoxDashboardPort.Size = new System.Drawing.Size(81, 26);
             this.textBoxDashboardPort.TabIndex = 3;
-            this.textBoxDashboardPort.TextChanged += new System.EventHandler(this.textBoxDashboardPort_TextChanged);
+            
             // 
             // label4
             // 
@@ -192,7 +192,7 @@
             this.label4.TabIndex = 4;
             this.label4.Text = "Feedback Port:";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.label4.Click += new System.EventHandler(this.label4_Click);
+           
             // 
             // textBoxFeedbackPort
             // 
@@ -201,7 +201,7 @@
             this.textBoxFeedbackPort.Name = "textBoxFeedbackPort";
             this.textBoxFeedbackPort.Size = new System.Drawing.Size(81, 26);
             this.textBoxFeedbackPort.TabIndex = 5;
-            this.textBoxFeedbackPort.TextChanged += new System.EventHandler(this.textBoxFeedbackPort_TextChanged);
+            
             // 
             // btnConnect
             // 
@@ -550,7 +550,6 @@
             this.btnJointMovJ.TabIndex = 2;
             this.btnJointMovJ.Text = "JointMovJ";
             this.btnJointMovJ.UseVisualStyleBackColor = true;
-           // this.btnJointMovJ.Click += new System.EventHandler(this.btnJointMovJ_Click);
             // 
             // btnMovL
             // 
@@ -1106,7 +1105,6 @@
             this.btnMinus1.TabIndex = 3;
             this.btnMinus1.Text = "J1-";
             this.btnMinus1.UseVisualStyleBackColor = true;
-            this.btnMinus1.Click += new System.EventHandler(this.btnMinus1_Click);
             // 
             // richTextBoxErrInfo
             // 
@@ -1324,6 +1322,7 @@
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MainForm";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.groupBoxConnect.ResumeLayout(false);
             this.groupBoxConnect.PerformLayout();

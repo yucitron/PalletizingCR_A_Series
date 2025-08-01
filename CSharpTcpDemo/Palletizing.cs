@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -26,7 +27,7 @@ namespace CSharpTcpDemo
         private Feedback mFeedback = new Feedback();
         private Dashboard mDashboard = new Dashboard();
         
-
+        private MainForm mainForm = new MainForm();
 
         private RobotConnectionManager robotManager;
         //定时获取数据并显示到UI*/
@@ -42,7 +43,7 @@ namespace CSharpTcpDemo
 
 
 
-        private PopupForm popupForm;
+        private PopupForm popupForm = null;
         private bool isPopupVisible = false;
 
         public double x1;
@@ -89,6 +90,8 @@ namespace CSharpTcpDemo
         internal class CoordinateData
         {
             public DescartesPoint PickPoint { get; set; }
+
+            public DescartesPoint SafePickPoint { get; set; }
             public DescartesPoint PalletPt1 { get; set; }
             public DescartesPoint PalletPt2 { get; set; }
             public DescartesPoint PalletPt3 { get; set; }
@@ -99,6 +102,8 @@ namespace CSharpTcpDemo
             private static readonly string ConfigFilePath = "coordinates.json";
             public static List<KutuNesnesi> Kutular = new List<KutuNesnesi>();
             internal static DescartesPoint PickPoint { get; set; }
+
+            internal static DescartesPoint SafePickPoint { get; set; }
             internal static DescartesPoint PalletPt1 { get; set; }
             internal static DescartesPoint PalletPt2 { get; set; }
             internal static DescartesPoint PalletPt3 { get; set; }
@@ -115,6 +120,7 @@ namespace CSharpTcpDemo
                         if (data != null)
                         {
                             PickPoint = data.PickPoint;
+                            SafePickPoint = data.SafePickPoint; // Güvenli Pick Point varsayılan olarak boş
                             PalletPt1 = data.PalletPt1;
                             PalletPt2 = data.PalletPt2;
                             PalletPt3 = data.PalletPt3;
@@ -142,6 +148,7 @@ namespace CSharpTcpDemo
                     var data = new CoordinateData
                     {
                         PickPoint = PickPoint,
+                        SafePickPoint = SafePickPoint, 
                         PalletPt1 = PalletPt1,
                         PalletPt2 = PalletPt2,
                         PalletPt3 = PalletPt3
@@ -265,9 +272,9 @@ namespace CSharpTcpDemo
 
             // Koordinat güncelleme örneği
             GlobalVeri.UpdatePickPoint(new DescartesPoint { x = 100, y = 200, z = 300, rx = 300, ry = 300, rz = 300 });
-            GlobalVeri.UpdatePalletPt1(new DescartesPoint { x = 100, y = 200, z = 300, rx = 300, ry = 300, rz = 300 });
-            GlobalVeri.UpdatePalletPt2(new DescartesPoint { x = 100, y = 200, z = 300, rx = 300, ry = 300, rz = 300 });
-            GlobalVeri.UpdatePalletPt3(new DescartesPoint { x = 100, y = 200, z = 300, rx = 300, ry = 300, rz = 300 });
+            GlobalVeri.UpdatePalletPt1(new DescartesPoint { x = 100, y = 200, z = 300, rx = 170, ry = -12, rz = -90 });
+            GlobalVeri.UpdatePalletPt2(new DescartesPoint { x = 200, y = 200, z = 300, rx = 170, ry = -12, rz = -90 });
+            GlobalVeri.UpdatePalletPt3(new DescartesPoint { x = 200, y = 100, z = 300, rx = 170, ry = -12, rz = -90 });
         }
 
         public void PrintLog(string str)
@@ -309,14 +316,25 @@ namespace CSharpTcpDemo
 
             GlobalVeri.PickPoint = new DescartesPoint()
             {
-                x = mFeedback.feedbackData.ToolVectorActual[0],
-                y = mFeedback.feedbackData.ToolVectorActual[1],
-                z = mFeedback.feedbackData.ToolVectorActual[2],
-                rx = mFeedback.feedbackData.ToolVectorActual[3],
-                ry = mFeedback.feedbackData.ToolVectorActual[4],
-                rz = mFeedback.feedbackData.ToolVectorActual[5]
+                x =Convert.ToInt32( mFeedback.feedbackData.ToolVectorActual[0]),
+                y = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[1]),
+                z = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[2]),
+                rx = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[3]),
+                ry = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[4]),
+                rz = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[5])
             };
             PrintLog2($" Picking is: {GlobalVeri.PickPoint} ");
+
+            GlobalVeri.SafePickPoint = new DescartesPoint()
+            {
+                x = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[0]),
+                y = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[1]),
+                z = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[2] + 30),
+                rx = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[3]),
+                ry = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[4]),
+                rz = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[5])
+            };
+
         }
 
         public void btnMove_Click(object sender, EventArgs e)
@@ -325,7 +343,7 @@ namespace CSharpTcpDemo
             for (double layer = Boxes.BoxHeight; layer < 5; layer++)
             {
 
-                // DEĞIŞTIRILEN SATIR: Doğrudan GlobalVeri'den al
+                
                 var kutular = GlobalVeri.Kutular;
 
                 if (kutular == null || kutular.Count == 0) // Koşul düzeltildi
@@ -351,18 +369,18 @@ namespace CSharpTcpDemo
 
 
                     DescartesPoint pt1 = new DescartesPoint();
-                    Adx = 300;
-                    
+                    Adx = 100;
 
-                    pt1.x = (GlobalVeri.PalletPt1.x + (Adx * ((double)kutu.Merkez.X / Boxes.paletGenislik)));
-                    pt1.y = GlobalVeri.PalletPt1.y + (Ady * ((double)kutu.Merkez.Y / Boxes.paletYukseklik));
+                   
+                    pt1.x = Convert.ToInt32(GlobalVeri.PalletPt1.x + (Adx * ((double)kutu.Merkez.X / Boxes.paletGenislik))); // PaletGenislik =400 //Palet Yükseklik = 400
+                    pt1.y = Convert.ToInt32(GlobalVeri.PalletPt1.y + (Adx * ((double)kutu.Merkez.Y / Boxes.paletYukseklik)));//
                     double oran = ((double)kutu.Merkez.X / Boxes.paletGenislik);
                     //pt1.x = kutu.Merkez.X;
                     //pt1.y = kutu.Merkez.Y;
-                    pt1.z = 50;
-                    pt1.rx = 60;
-                    pt1.ry = 80;
-                    pt1.rz = 90;
+                    pt1.z = 200;
+                    pt1.rx = 175;
+                    pt1.ry = -12;
+                    pt1.rz = -90;
 
                     // PrintLog($"Kutu ID: {kutu.ID} - Hedef konum: ({pt1.x}, {pt1.y}, {pt1.z})");
                     PrintLog2($"Kutu ID: {kutu.ID} - Hedef konum: ({pt1.x}, {pt1.y}, {pt1.z})");
@@ -391,8 +409,26 @@ namespace CSharpTcpDemo
 
                    thd1.Start();
                    Thread.Sleep(500); // 500ms bekleme*/
-                    /*
+                    
                     Thread thd2 = new Thread(() =>
+                    {
+                        try
+                        {
+                            string ret = mDashboard.MovL(GlobalVeri.SafePickPoint);
+                            PrintLog($"Cevap alındı: {ret}");
+                            PrintLog2($"Cevap alındı: {ret}");
+                        }
+                        catch (Exception ex)
+                        {
+                            PrintLog($"Hareket hatası: {ex.Message}");
+                            PrintLog2($"Hareket hatası: {ex.Message}");
+                        }
+                    });
+
+                    thd2.Start();
+                    Thread.Sleep(500); // 500ms bekleme*/
+
+                    Thread thd3 = new Thread(() =>
                     {
                         try
                         {
@@ -407,7 +443,27 @@ namespace CSharpTcpDemo
                         }
                     });
 
-                    thd2.Start();
+                    thd3.Start();
+                    Thread.Sleep(500); // 500ms bekleme*/
+
+
+                    
+                    Thread thd4 = new Thread(() =>
+                    {
+                        try
+                        {
+                            string ret = mDashboard.MovL(GlobalVeri.SafePickPoint);
+                            PrintLog($"Cevap alındı: {ret}");
+                            PrintLog2($"Cevap alındı: {ret}");
+                        }
+                        catch (Exception ex)
+                        {
+                            PrintLog($"Hareket hatası: {ex.Message}");
+                            PrintLog2($"Hareket hatası: {ex.Message}");
+                        }
+                    });
+                    
+                    thd4.Start();
                     Thread.Sleep(500); // 500ms bekleme*/
 
                 }
@@ -443,12 +499,26 @@ namespace CSharpTcpDemo
 
         private void jogToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
-            popupForm = new PopupForm();
-            
-            popupForm.Show();
-             //HidePopup();
+            // Popup zaten açıksa ön plana getir
+            if (popupForm != null && !popupForm.IsDisposed)
+            {
+                popupForm.BringToFront();
+                return;
+            }
 
+            // Yeni popup oluştur ve göster
+            popupForm = new PopupForm();
+
+            // Popup kapatıldığında referansı temizle
+            popupForm.FormClosed += (s, args) => popupForm = null;
+
+            popupForm.Show();
+        }
+
+        // Form kapatılırken popup'ı da kapat
+        private void PalletizingForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            popupForm?.Close();
         }
 
         private void Pt1btn_Click(object sender, EventArgs e)
@@ -462,12 +532,12 @@ namespace CSharpTcpDemo
                 ry = mFeedback.feedbackData.ToolVectorActual[4],
                 rz = mFeedback.feedbackData.ToolVectorActual[5]*/
 
-                x = 56,
-                y = 89,
-                z = 23,
-                rx = 45,
-                ry = 56,
-                rz = 67
+                x = 80,
+                y = 200,
+                z = 200,
+                rx = 170,
+                ry = -11,
+                rz = -90
             };
 
             double x1 = GlobalVeri.PalletPt1.x;

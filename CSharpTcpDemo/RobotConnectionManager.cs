@@ -51,8 +51,8 @@ namespace CSharpTcpDemo
         private Dashboard mDashboard;
 
         // Timer'lar - bağlantı süresince aktif kalacak
-        private System.Timers.Timer mTimer;
-        private System.Timers.Timer mTimerReader;
+        public System.Timers.Timer mTimer;
+        public System.Timers.Timer mTimerReader;
 
         // Bağlantı durumu
         public bool IsConnected { get; private set; } = false;

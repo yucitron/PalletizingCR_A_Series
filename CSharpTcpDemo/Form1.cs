@@ -102,7 +102,7 @@ namespace CSharpTcpDemo
         {
             string strIp = "192.168.5.1";
             int iPortFeedback = 30004;
-            int iPortMove = 30003;
+            //int iPortMove = 30003;
             int iPortDashboard = 29999;
 
             PrintLog("Connecting...");
@@ -112,11 +112,7 @@ namespace CSharpTcpDemo
                     PrintLog(string.Format("Connect {0}:{1} Fail!!", strIp, iPortDashboard));
                     return;
                 }
-                if (!mDashboard.Connect(strIp, iPortMove))
-                {
-                    PrintLog(string.Format("Connect {0}:{1} Fail!!", strIp, iPortMove));
-                    return;
-                }
+                
                 if (!mFeedback.Connect(strIp, iPortFeedback))
                 {
                     PrintLog(string.Format("Connect {0}:{1} Fail!!", strIp, iPortFeedback));
