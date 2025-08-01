@@ -13,6 +13,7 @@ namespace CSharpTcpDemo
 {
     public partial class Palletizing : Form
     {
+        
         private static Palletizing _instance;
         public static Palletizing Instance
         {
@@ -232,6 +233,7 @@ namespace CSharpTcpDemo
             pltHeight = Convert.ToInt16(numpltHeight.Value);
             //////
             InitializeRobotComponents();
+            
         }
 
         private void InitializeRobotComponents()
@@ -291,12 +293,12 @@ namespace CSharpTcpDemo
             var pallet3 = GlobalVeri.PalletPt3;
 
             // Koordinat güncelleme örneği
-            GlobalVeri.UpdatePickPoint(new DescartesPoint { x = 100, y = 200, z = 300, rx = 300, ry = 300, rz = 300 });
+            /*GlobalVeri.UpdatePickPoint(new DescartesPoint { x = 100, y = 200, z = 300, rx = 300, ry = 300, rz = 300 });
             GlobalVeri.UpdateSafePickPoint(new DescartesPoint { x = 100, y = 200, z = 330, rx = 300, ry = 300, rz = 300 });
             GlobalVeri.UpdateTransitionPoint(new DescartesPoint { x = 100, y = 200, z = 300, rx = 170, ry = -12, rz = -90 });
             GlobalVeri.UpdatePalletPt1(new DescartesPoint { x = 100, y = 200, z = 300, rx = 170, ry = -12, rz = -90 });
             GlobalVeri.UpdatePalletPt2(new DescartesPoint { x = 200, y = 200, z = 300, rx = 170, ry = -12, rz = -90 });
-            GlobalVeri.UpdatePalletPt3(new DescartesPoint { x = 200, y = 100, z = 300, rx = 170, ry = -12, rz = -90 });
+            GlobalVeri.UpdatePalletPt3(new DescartesPoint { x = 200, y = 100, z = 300, rx = 170, ry = -12, rz = -90 });*/
         }
 
         public void PrintLog(string str)
@@ -399,10 +401,10 @@ namespace CSharpTcpDemo
                     double oran = ((double)kutu.Merkez.X / Boxes.paletGenislik);
                     //pt1.x = kutu.Merkez.X;
                     //pt1.y = kutu.Merkez.Y;
-                    pt1.z = 200;
-                    pt1.rx = 175;
-                    pt1.ry = -12;
-                    pt1.rz = -90;
+                    pt1.z = Convert.ToInt32(GlobalVeri.PalletPt1.z);
+                    pt1.rx = Convert.ToInt32(GlobalVeri.PalletPt1.rx);
+                    pt1.ry = Convert.ToInt32(GlobalVeri.PalletPt1.ry);
+                    pt1.rz = Convert.ToInt32(GlobalVeri.PalletPt1.rz);
 
                     // PrintLog($"Kutu ID: {kutu.ID} - Hedef konum: ({pt1.x}, {pt1.y}, {pt1.z})");
                     PrintLog2($"Kutu ID: {kutu.ID} - Hedef konum: ({pt1.x}, {pt1.y}, {pt1.z})");
@@ -605,28 +607,28 @@ namespace CSharpTcpDemo
         private void Pt1btn_Click(object sender, EventArgs e)
         {
             GlobalVeri.PalletPt1 = new DescartesPoint()
-            {/*
+            {
                 x = mFeedback.feedbackData.ToolVectorActual[0],
                 y = mFeedback.feedbackData.ToolVectorActual[1],
                 z = mFeedback.feedbackData.ToolVectorActual[2],
                 rx = mFeedback.feedbackData.ToolVectorActual[3],
                 ry = mFeedback.feedbackData.ToolVectorActual[4],
-                rz = mFeedback.feedbackData.ToolVectorActual[5]*/
+                rz = mFeedback.feedbackData.ToolVectorActual[5]
 
-                x = 80,
-                y = 200,
-                z = 200,
-                rx = 170,
-                ry = -11,
-                rz = -90
+                /* x = 80,
+                 y = 200,
+                 z = 200,
+                 rx = 170,
+                 ry = -11,
+                 rz = -90*/
             };
 
-            double x1 = GlobalVeri.PalletPt1.x;
-            double y1 = GlobalVeri.PalletPt1.y;
-            double z1 = GlobalVeri.PalletPt1.z;
-            double rx1 = GlobalVeri.PalletPt1.rx;
-            double ry1 = GlobalVeri.PalletPt1.ry;
-            double rz1 = GlobalVeri.PalletPt1.rz;
+            double x1 = Convert.ToInt32(GlobalVeri.PalletPt1.x);
+            double y1 = Convert.ToInt32(GlobalVeri.PalletPt1.y);
+            double z1 = Convert.ToInt32(GlobalVeri.PalletPt1.z);
+            double rx1 = Convert.ToInt32(GlobalVeri.PalletPt1.rx);
+            double ry1 = Convert.ToInt32(GlobalVeri.PalletPt1.ry);
+            double rz1 = Convert.ToInt32(GlobalVeri.PalletPt1.rz);
            GlobalVeri.UpdatePalletPt1(GlobalVeri.PalletPt1);
             PrintLog2($"Pallet Point 1 set to: {GlobalVeri.PalletPt1}");
 
@@ -645,6 +647,8 @@ namespace CSharpTcpDemo
                 rz = mFeedback.feedbackData.ToolVectorActual[5]
             };
 
+            PrintLog2($"Pallet Point 2 set to: {GlobalVeri.PalletPt2}");
+            GlobalVeri.UpdatePalletPt2(GlobalVeri.PalletPt2);
             double x2 = GlobalVeri.PalletPt2.x;
             double y2 = GlobalVeri.PalletPt2.y;
             double z2 = GlobalVeri.PalletPt2.z;
@@ -671,7 +675,8 @@ namespace CSharpTcpDemo
                 ry = mFeedback.feedbackData.ToolVectorActual[4],
                 rz = mFeedback.feedbackData.ToolVectorActual[5]
             };
-
+            PrintLog2($"Pallet Point 2 set to: {GlobalVeri.PalletPt2}");
+            GlobalVeri.UpdatePalletPt2(GlobalVeri.PalletPt2);
             double x3 = GlobalVeri.PalletPt3.x;
             double y3 = GlobalVeri.PalletPt3.y;
             double z3 = GlobalVeri.PalletPt3.z;
@@ -708,6 +713,8 @@ namespace CSharpTcpDemo
                 rz = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[5])
             };
             PrintLog2($" Transition is: {GlobalVeri.TransitionPoint} ");
+            
+            GlobalVeri.UpdatePalletPt2(GlobalVeri.TransitionPoint);
         }
     }
 }
