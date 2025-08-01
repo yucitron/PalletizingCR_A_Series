@@ -53,6 +53,7 @@
             this.groupBoxLog = new System.Windows.Forms.GroupBox();
             this.rich2TextBoxLog = new System.Windows.Forms.RichTextBox();
             this.btnclear = new System.Windows.Forms.Button();
+            this.btnTransition = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -299,11 +300,22 @@
             this.btnclear.UseVisualStyleBackColor = true;
             this.btnclear.Click += new System.EventHandler(this.btnclear_Click);
             // 
+            // btnTransition
+            // 
+            this.btnTransition.Location = new System.Drawing.Point(497, 246);
+            this.btnTransition.Name = "btnTransition";
+            this.btnTransition.Size = new System.Drawing.Size(92, 66);
+            this.btnTransition.TabIndex = 21;
+            this.btnTransition.Text = "Transition Point";
+            this.btnTransition.UseVisualStyleBackColor = true;
+            this.btnTransition.Click += new System.EventHandler(this.btnTransition_Click);
+            // 
             // Palletizing
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1398, 1024);
+            this.Controls.Add(this.btnTransition);
             this.Controls.Add(this.btnclear);
             this.Controls.Add(this.groupBoxLog);
             this.Controls.Add(this.Pt3btn);
@@ -363,5 +375,6 @@
         private System.Windows.Forms.GroupBox groupBoxLog;
         public System.Windows.Forms.RichTextBox rich2TextBoxLog;
         private System.Windows.Forms.Button btnclear;
+        private System.Windows.Forms.Button btnTransition;
     }
 }

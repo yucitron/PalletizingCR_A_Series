@@ -90,7 +90,7 @@ namespace CSharpTcpDemo
         internal class CoordinateData
         {
             public DescartesPoint PickPoint { get; set; }
-
+            public DescartesPoint TransitionPoint { get; set; }
             public DescartesPoint SafePickPoint { get; set; }
             public DescartesPoint PalletPt1 { get; set; }
             public DescartesPoint PalletPt2 { get; set; }
@@ -103,6 +103,7 @@ namespace CSharpTcpDemo
             public static List<KutuNesnesi> Kutular = new List<KutuNesnesi>();
             internal static DescartesPoint PickPoint { get; set; }
 
+            internal static DescartesPoint TransitionPoint { get; set; }
             internal static DescartesPoint SafePickPoint { get; set; }
             internal static DescartesPoint PalletPt1 { get; set; }
             internal static DescartesPoint PalletPt2 { get; set; }
@@ -120,7 +121,8 @@ namespace CSharpTcpDemo
                         if (data != null)
                         {
                             PickPoint = data.PickPoint;
-                            SafePickPoint = data.SafePickPoint; // Güvenli Pick Point varsayılan olarak boş
+                            SafePickPoint = data.SafePickPoint;// Güvenli Pick Point varsayılan olarak boş
+                            TransitionPoint = data.TransitionPoint; // Varsayılan olarak boş
                             PalletPt1 = data.PalletPt1;
                             PalletPt2 = data.PalletPt2;
                             PalletPt3 = data.PalletPt3;
@@ -148,7 +150,9 @@ namespace CSharpTcpDemo
                     var data = new CoordinateData
                     {
                         PickPoint = PickPoint,
-                        SafePickPoint = SafePickPoint, 
+                        SafePickPoint = SafePickPoint,
+                        TransitionPoint = TransitionPoint, 
+
                         PalletPt1 = PalletPt1,
                         PalletPt2 = PalletPt2,
                         PalletPt3 = PalletPt3
@@ -169,6 +173,8 @@ namespace CSharpTcpDemo
             private static void InitializeDefaultValues()
             {
                 PickPoint = new DescartesPoint();
+                SafePickPoint = new DescartesPoint(); 
+                TransitionPoint = new DescartesPoint(); 
                 PalletPt1 = new DescartesPoint();
                 PalletPt2 = new DescartesPoint();
                 PalletPt3 = new DescartesPoint();
@@ -181,6 +187,18 @@ namespace CSharpTcpDemo
                 PickPoint = newPoint;
                 SaveCoordinates();
             }
+
+            public static void UpdateSafePickPoint(DescartesPoint newPoint)
+            {
+                SafePickPoint = newPoint;
+                SaveCoordinates();
+            }
+            public static void UpdateTransitionPoint(DescartesPoint newPoint)
+            {
+                TransitionPoint = newPoint;
+                SaveCoordinates();
+            }
+
 
             public static void UpdatePalletPt1(DescartesPoint newPoint)
             {
@@ -266,12 +284,16 @@ namespace CSharpTcpDemo
         {
             // Koordinatları okuma
             var pickPoint = GlobalVeri.PickPoint;
+            var safePickPoint = GlobalVeri.SafePickPoint;
+            var transitionPoint = GlobalVeri.TransitionPoint;
             var pallet1 = GlobalVeri.PalletPt1;
             var pallet2 = GlobalVeri.PalletPt2;
             var pallet3 = GlobalVeri.PalletPt3;
 
             // Koordinat güncelleme örneği
             GlobalVeri.UpdatePickPoint(new DescartesPoint { x = 100, y = 200, z = 300, rx = 300, ry = 300, rz = 300 });
+            GlobalVeri.UpdateSafePickPoint(new DescartesPoint { x = 100, y = 200, z = 330, rx = 300, ry = 300, rz = 300 });
+            GlobalVeri.UpdateTransitionPoint(new DescartesPoint { x = 100, y = 200, z = 300, rx = 170, ry = -12, rz = -90 });
             GlobalVeri.UpdatePalletPt1(new DescartesPoint { x = 100, y = 200, z = 300, rx = 170, ry = -12, rz = -90 });
             GlobalVeri.UpdatePalletPt2(new DescartesPoint { x = 200, y = 200, z = 300, rx = 170, ry = -12, rz = -90 });
             GlobalVeri.UpdatePalletPt3(new DescartesPoint { x = 200, y = 100, z = 300, rx = 170, ry = -12, rz = -90 });
@@ -612,6 +634,21 @@ namespace CSharpTcpDemo
         private void btnclear_Click(object sender, EventArgs e)
         {
             rich2TextBoxLog.Text = "";
+        }
+
+        private void btnTransition_Click(object sender, EventArgs e)
+        {
+
+            GlobalVeri.TransitionPoint = new DescartesPoint()
+            {
+                x = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[0]),
+                y = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[1]),
+                z = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[2]),
+                rx = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[3]),
+                ry = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[4]),
+                rz = Convert.ToInt32(mFeedback.feedbackData.ToolVectorActual[5])
+            };
+            PrintLog2($" Picking is: {GlobalVeri.TransitionPoint} ");
         }
     }
 }
